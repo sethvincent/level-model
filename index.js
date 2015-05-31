@@ -1,6 +1,7 @@
 var Emitter = require('component-emitter')
 var inherits = require('inherits')
 var filter = require('filter-object-stream')
+var filterObject = require('filter-object')
 var validator = require('is-my-json-valid')
 var indexer = require('level-simple-indexes')
 var sublevel = require('subleveldown')
@@ -14,13 +15,26 @@ function LevelModel (db, opts) {
   if (!(this instanceof LevelModel)) return new LevelModel(db, opts)
   Emitter.call(this)
   var self = this
-  this.modelName = opts.modelName || 'model'
+  
+  var schema = filterObject(opts, ['*', '!modelName', '!timestamp', '!indexKeys', '!validateOpts'])
+  this.modelName = opts.modelName
   this.db = sublevel(db, this.modelName, { valueEncoding: 'json' })
-  this.schema = opts.schema
-  this.validate = validator(opts.schema, opts.validateOpts)
   this.timestamps = opts.timestamps || true
   this.timestamp = opts.timestamp || function () { return new Date(Date.now()).toISOString() }
   this.indexKeys = opts.indexKeys || []
+  
+  if (!opts.schema) {
+    opts.schema = extend({
+      title: self.modelName,
+      type: 'object'
+    }, schema)
+  }
+
+  opts.schema.required = opts.schema.required.concat('key')
+  this.validateOpts = opts.validateOpts
+
+  this.schema = opts.schema
+  this.validate = validator(opts.schema, opts.validateOpts)
   this.indexes = {}
 
   function map (key, callback) {

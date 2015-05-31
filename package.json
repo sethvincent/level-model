@@ -1,7 +1,7 @@
 {
   "name": "level-model",
   "description": "",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "repository": {
     "url": "git://github.com/sethvincent/level-model.git"
   },
@@ -13,6 +13,7 @@
     "component-emitter": "^1.2.0",
     "cuid": "^1.2.5",
     "extend": "^2.0.1",
+    "filter-object": "^1.1.2",
     "filter-object-stream": "0.0.1",
     "inherits": "^2.0.1",
     "is-my-json-valid": "^2.12.0",

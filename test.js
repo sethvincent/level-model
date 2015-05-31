@@ -18,17 +18,13 @@ inherits(Example, model)
 
 var example = new Example(db, {
   modelName: 'example',
+  properties: {
+    key: { type: 'string' },
+    test: { type: 'string' },
+    ok: { type: 'integer' }
+  },
   indexKeys: ['test', 'ok'],
-  schema: {
-    title: "Example",
-    type: "object",
-    properties: {
-      key: { type: 'string' },
-      test: { type: 'string' },
-      ok: { type: 'integer' }
-    },
-    required: ['key', 'test']
-  }
+  required: ['test']
 })
 
 test('model exists', function (t) {

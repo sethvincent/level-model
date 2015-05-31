@@ -19,15 +19,11 @@ inherits(Posts, Model)
 var posts = new Posts(db, {
   modelName: 'example',
   indexKeys: ['test', 'ok'],
-  schema: {
-    title: "Example",
-    type: "object",
-    properties: {
-      title: { type: 'string' },
-      content: { type: 'string' },
-    },
-    required: ['title']
-  }
+  properties: {
+    title: { type: 'string' },
+    content: { type: 'string' },
+  },
+  required: ['title']
 })
 
 var data = {
@@ -48,8 +44,8 @@ posts.create(data, function (err, post) {
 var Model = require('level-model')
 var inherits = require('util').inherits
 
-function Posts (db, opts) {
-  Model.call(this, db, opts)
+function Posts (db, options) {
+  Model.call(this, db, options)
 }
 
 inherits(Posts, Model)
@@ -71,6 +67,19 @@ Options:
   }
 }
 ```
+
+Or:
+
+```js
+{
+  modelName: 'Example',
+  indexKeys: [],
+  properties: {},
+  required: []
+}
+```
+
+The options object can accept anything that [json-schema](http://json-schema.org) accepts.
 
 ### `posts.create(data, callback)`
 
