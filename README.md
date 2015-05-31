@@ -49,6 +49,8 @@ var inherits = require('util').inherits
 function Posts (db, opts) {
   Model.call(this, db, opts)
 }
+
+inherits(Posts, Model)
 ```
 
 ### `var posts = new Posts(db, opts)`
