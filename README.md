@@ -5,8 +5,10 @@ A higher-level module for creating content models using levelup as db.
 ## Example
 
 ```
+var level = require('level')
 var Model = require('level-model')
 var inherits = require('util').inherits
+var db = level('db')
 
 function Posts (db, opts) {
   Model.call(this, db, opts)
