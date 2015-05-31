@@ -32,7 +32,7 @@ function LevelModel (db, opts) {
 
   var indexOpts = opts.indexOpts || {
     properties: this.indexKeys,
-    keys: true, 
+    keys: true,
     values: true,
     map: map
   }
@@ -43,16 +43,7 @@ function LevelModel (db, opts) {
 
 LevelModel.prototype.create = function (data, callback) {
   var self = this
-
-  if (typeof key === 'object') {
-    callback = data
-    data = key
-  }
-
-  if (!data.key || key) {
-    key = data.key = cuid()
-  }
-
+  if (!data.key) var key = data.key = cuid()
   var validated = this.validate(data)
 
   if (!validated) {
@@ -108,7 +99,7 @@ LevelModel.prototype.update = function (key, data, callback) {
       self.db.put(key, model, function (err) {
         self.emit('update', model)
         callback(err, model)
-      });
+      })
     })
   })
 }
@@ -120,7 +111,7 @@ LevelModel.prototype.delete = function (key, callback) {
     if (err || !data) return callback(err)
     self.indexer.removeIndexes(data, function () {
       self.emit('delete', data)
-      self.db.del(key, callback);
+      self.db.del(key, callback)
     })
   })
 }
@@ -129,12 +120,12 @@ LevelModel.prototype.createReadStream = function (options) {
   return this.db.createReadStream(options)
 }
 
-LevelModel.prototype.find = 
+LevelModel.prototype.find =
 LevelModel.prototype.createFindStream = function (index, options) {
   return this.indexer.find(index, options)
 }
 
-LevelModel.prototype.filter = 
+LevelModel.prototype.filter =
 LevelModel.prototype.createFilterStream = function (options) {
   return this.createReadStream(options).pipe(filter(options.query))
 }
