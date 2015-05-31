@@ -1,6 +1,6 @@
 # level-model
 
-A higher-level module for creating content models using levelup as db.
+A higher-level module for creating content models using [levelup](http://npmjs.org/levelup) as db and [is-my-json-valid](http://npmjs.org/is-my-json-valid) for validation.
 
 ## Example
 
