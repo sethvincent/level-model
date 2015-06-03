@@ -15,20 +15,18 @@ function LevelModel (db, opts) {
   if (!(this instanceof LevelModel)) return new LevelModel(db, opts)
   Emitter.call(this)
   var self = this
-  
-  var schema = filterObject(opts, ['*', '!modelName', '!timestamp', '!indexKeys', '!validateOpts'])
+
+  var schema = opts.schema || filterObject(opts, ['*', '!modelName', '!timestamp', '!indexKeys', '!validateOpts'])
   this.modelName = opts.modelName
   this.db = sublevel(db, this.modelName, { valueEncoding: 'json' })
   this.timestamps = opts.timestamps || true
   this.timestamp = opts.timestamp || function () { return new Date(Date.now()).toISOString() }
   this.indexKeys = opts.indexKeys || []
-  
-  if (!opts.schema) {
-    opts.schema = extend({
-      title: self.modelName,
-      type: 'object'
-    }, schema)
-  }
+
+  opts.schema = extend({
+    title: self.modelName,
+    type: 'object'
+  }, schema)
 
   opts.schema.required = opts.schema.required.concat('key')
   this.validateOpts = opts.validateOpts
