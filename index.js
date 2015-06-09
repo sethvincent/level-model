@@ -139,5 +139,7 @@ LevelModel.prototype.createFindStream = function (index, options) {
 
 LevelModel.prototype.filter =
 LevelModel.prototype.createFilterStream = function (options) {
-  return this.createReadStream(options).pipe(filter(options.query))
+  if (!options.query) var options = { query: options }
+  return this.createReadStream(options).pipe(through.obj(filter(options.query)))
 }
+
