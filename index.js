@@ -5,6 +5,7 @@ var filterObject = require('filter-object')
 var validator = require('is-my-json-valid')
 var indexer = require('level-simple-indexes')
 var sublevel = require('subleveldown')
+var through = require('through2')
 var extend = require('extend')
 var cuid = require('cuid')
 

@@ -1,7 +1,7 @@
 {
   "name": "level-model",
-  "description": "",
-  "version": "1.1.2",
+  "description": "A higher-level module for creating content models using levelup as db and is-my-json-valid for validation",
+  "version": "1.1.4",
   "repository": {
     "url": "git://github.com/sethvincent/level-model.git"
   },
@@ -19,7 +19,8 @@
     "is-my-json-valid": "^2.12.0",
     "isarray": "0.0.1",
     "level-simple-indexes": "0.0.2",
-    "subleveldown": "^2.0.0"
+    "subleveldown": "^2.0.0",
+    "through2": "^0.6.5"
   },
   "devDependencies": {
     "levelup": "^1.1.1",
