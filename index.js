@@ -138,6 +138,10 @@ LevelModel.prototype.createFindStream = function (index, options) {
   return this.indexer.find(index, options)
 }
 
+LevelModel.prototype.findOne = function (index, options, callback) {
+  this.indexer.findOne(index, options, callback)
+}
+
 LevelModel.prototype.filter =
 LevelModel.prototype.createFilterStream = function (options) {
   if (!options.query) var options = { query: options }
