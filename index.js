@@ -31,10 +31,8 @@ function LevelModel (db, opts) {
 
   opts.schema.required = opts.schema.required.concat('key')
   this.validateOpts = opts.validateOpts
-
   this.schema = opts.schema
   this.validate = validator(opts.schema, opts.validateOpts)
-  this.indexes = {}
 
   function map (key, callback) {
     self.get(key, function (err, val) {
