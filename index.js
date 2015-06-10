@@ -36,7 +36,6 @@ function LevelModel (db, opts) {
 
   function map (key, callback) {
     self.get(key, function (err, val) {
-      self.db.createReadStream().on('data', console.log)
       callback(err, val)
     })
   }
