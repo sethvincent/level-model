@@ -66,6 +66,8 @@ LevelModel.prototype.create = function (data, callback) {
     data.updated = null
   }
 
+  data = this.beforeCreate(data)
+
   this.db.put(key, data, function (err) {
     if (err) return callback(err)
 
@@ -105,6 +107,8 @@ LevelModel.prototype.update = function (key, data, callback) {
     if (err || !model) return callback(new Error(self.modelName + ' not found with key ' + key))
     model = extend(model, data)
     if (self.timestamps) model.updated = self.timestamp()
+    model = self.beforeUpdate(model)
+
     self.indexer.updateIndexes(model, function () {
       self.db.put(key, model, function (err) {
         self.emit('update', model)
@@ -145,3 +149,10 @@ LevelModel.prototype.createFilterStream = function (options) {
   return this.createReadStream(options).pipe(through.obj(filter(options.query)))
 }
 
+LevelModel.prototype.beforeCreate = function (data) {
+  return data
+}
+
+LevelModel.prototype.beforeUpdate = function (data) {
+  return data
+}

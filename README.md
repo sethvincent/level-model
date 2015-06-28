@@ -93,6 +93,25 @@ The options object can accept anything that [json-schema](http://json-schema.org
 
 ### `posts.find(index, options)`
 
+## Format data before create & update
+
+Override level-model's `beforeCreate` and `beforeUpdate` methods to format data before it is saved to the db:
+
+```
+function Posts (db, options) {
+  Model.call(this, db, options)
+}
+
+Posts.prototype.beforeCreate = function (data) {
+  data.slug = slugify(data.title)
+  return data
+}
+
+Posts.prototype.beforeUpdate = function (data) {
+  return data
+}
+```
+
 ## Events
 
 ### `example.on('create', function (model) {})`
