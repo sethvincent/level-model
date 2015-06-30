@@ -30,7 +30,7 @@ function LevelModel (db, opts) {
   }, schema)
 
   opts.schema.required = opts.schema.required || []
-  if (opts.schema.require.indexOf('key') < 0) opts.schema.required.concat('key')
+  if (opts.schema.required.indexOf('key') < 0) opts.schema.required.concat('key')
   this.validateOpts = opts.validateOpts
   this.schema = opts.schema
   this.validate = validator(opts.schema, opts.validateOpts)
