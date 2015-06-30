@@ -17,26 +17,25 @@ function LevelModel (db, opts) {
   Emitter.call(this)
   var self = this
 
-  var schema = opts.schema || filterObject(opts, ['*', '!modelName', '!timestamp', '!indexKeys', '!validateOpts'])
+  this.schema = filterObject(opts, ['*', '!modelName', '!timestamp', '!indexKeys', '!validateOpts', '!prefix'])
   this.modelName = opts.modelName
   this.db = sublevel(db, this.modelName, { valueEncoding: 'json' })
   this.timestamps = opts.timestamps || true
   this.timestamp = opts.timestamp || function () { return new Date(Date.now()).toISOString() }
   this.indexKeys = opts.indexKeys || []
 
-  opts.schema = extend({
+  this.schema = extend({
     title: self.modelName,
     type: 'object'
-  }, schema)
-
-  opts.schema.required = opts.schema.required || []
-  if (opts.schema.required.indexOf('key') < 0) {
-    opts.schema.required = opts.schema.required.concat('key')
+  }, this.schema)
+  
+  this.schema.required = this.schema.required || []
+  if (this.schema.required.indexOf('key') < 0) {
+    this.schema.required = this.schema.required.concat('key')
   }
 
   this.validateOpts = opts.validateOpts
-  this.schema = opts.schema
-  this.validate = validator(opts.schema, opts.validateOpts)
+  this.validate = validator(this.schema, opts.validateOpts)
 
   function map (key, callback) {
     self.get(key, function (err, val) {

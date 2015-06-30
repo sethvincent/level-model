@@ -51,24 +51,9 @@ function Posts (db, options) {
 inherits(Posts, Model)
 ```
 
-### `var posts = new Posts(db, opts)`
+### `var posts = new Posts(db, options)`
 
 Options:
-
-```js
-{
-  modelName: '',
-  indexKeys: [],
-  schema: {
-    title: "Example",
-    type: "object",
-    properties: {},
-    required: []
-  }
-}
-```
-
-Or:
 
 ```js
 {
