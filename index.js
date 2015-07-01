@@ -4,6 +4,7 @@ var filter = require('filter-object-stream')
 var filterObject = require('filter-object')
 var validator = require('is-my-json-valid')
 var indexer = require('level-simple-indexes')
+var defaults = require('json-schema-defaults')
 var sublevel = require('subleveldown')
 var through = require('through2')
 var extend = require('extend')
@@ -57,7 +58,10 @@ function LevelModel (db, opts) {
 LevelModel.prototype.create = function (data, callback) {
   var self = this
   if (!data.key) var key = data.key = cuid()
+  data = extend(defaults(this.schema), data)
+
   var validated = this.validate(data)
+  console.log(validated, data)
 
   if (!validated) {
     // TODO: more useful error message
