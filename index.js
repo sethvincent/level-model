@@ -59,21 +59,15 @@ LevelModel.prototype.create = function (data, callback) {
   var self = this
   if (!data.key) var key = data.key = cuid()
   data = extend(defaults(this.schema), data)
+  data = this.beforeCreate(data)
 
   var validated = this.validate(data)
-
-  if (!validated) {
-    // TODO: more useful error message
-    return callback(new Error(this.modelName + ' object does not match schema'))
-  }
+  if (!validated) return callback(new Error(JSON.stringify(this.validate.errors)))
 
   if (this.timestamps) {
     data.created = this.timestamp()
     data.updated = null
   }
-
-  data = this.beforeCreate(data)
-
   this.db.put(key, data, function (err) {
     if (err) return callback(err)
 
@@ -114,6 +108,9 @@ LevelModel.prototype.update = function (key, data, callback) {
     model = extend(model, data)
     if (self.timestamps) model.updated = self.timestamp()
     model = self.beforeUpdate(model)
+
+    var validated = self.validate(data)
+    if (!validated) return callback(new Error(JSON.stringify(self.validate.errors)))
 
     self.indexer.updateIndexes(model, function () {
       self.db.put(key, model, function (err) {
