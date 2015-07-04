@@ -61,7 +61,6 @@ LevelModel.prototype.create = function (data, callback) {
   data = extend(defaults(this.schema), data)
 
   var validated = this.validate(data)
-  console.log(validated, data)
 
   if (!validated) {
     // TODO: more useful error message
