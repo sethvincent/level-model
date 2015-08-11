@@ -30,6 +30,10 @@ function LevelModel (db, opts) {
     type: 'object'
   }, this.schema)
   
+  this.schema.properties.key = {
+    type: 'string'
+  }
+  
   this.schema.required = this.schema.required || []
   if (this.schema.required.indexOf('key') < 0) {
     this.schema.required = this.schema.required.concat('key')
