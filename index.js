@@ -143,7 +143,11 @@ LevelModel.prototype.createFindStream = function (index, options) {
 }
 
 LevelModel.prototype.findOne = function (index, options, callback) {
-  this.indexer.findOne(index, options, callback)
+  this.indexer.findOne(index, options, function (err, model) {
+    if (err) return callback(err)
+    if (!model) return callback(new Error('[NotFoundError: model not found with ' + index + ' ' + options + ']'))
+    return callback(null, model)
+  })
 }
 
 LevelModel.prototype.filter =
