@@ -61,7 +61,8 @@ function LevelModel (db, opts) {
 
 LevelModel.prototype.create = function (data, callback) {
   var self = this
-  if (!data.key) var key = data.key = cuid()
+  var key = data.key ? data.key : cuid()
+  if (!data.key) data.key = key
   data = extend(defaults(this.schema), data)
   data = this.beforeCreate(data)
 
