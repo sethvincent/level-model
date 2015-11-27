@@ -63,8 +63,8 @@ LevelModel.prototype.create = function (data, callback) {
   var self = this
   var key = data.key ? data.key : cuid()
   if (!data.key) data.key = key
-  data = extend(defaults(this.schema), data)
   data = this.beforeCreate(data)
+  data = extend(defaults(this.schema), data)
 
   var validated = this.validate(data)
   if (!validated) return callback(new Error(JSON.stringify(this.validate.errors)))
