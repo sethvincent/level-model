@@ -21,7 +21,7 @@ function LevelModel (db, opts) {
   this.schema = filterObject(opts, ['*', '!modelName', '!timestamp', '!indexKeys', '!validateOpts', '!prefix'])
   this.modelName = opts.modelName
   this.db = sublevel(db, this.modelName, { valueEncoding: 'json' })
-  this.timestamps = opts.timestamps || true
+  this.timestamps = opts.timestamps === undefined ? true : opts.timestamps
   this.timestamp = opts.timestamp || function () { return new Date(Date.now()).toISOString() }
   this.indexKeys = opts.indexKeys || []
 
@@ -33,7 +33,18 @@ function LevelModel (db, opts) {
   this.schema.properties.key = {
     type: 'string'
   }
-  
+
+  if (this.timestamps) {
+    this.schema.properties.created = {
+      type: ['string', 'null'],
+      default: null
+    }
+    this.schema.properties.updated = {
+      type: ['string', 'null'],
+      default: null
+    }
+  }
+
   this.schema.required = this.schema.required || []
   if (this.schema.required.indexOf('key') < 0) {
     this.schema.required = this.schema.required.concat('key')
@@ -65,7 +76,7 @@ LevelModel.prototype.create = function (data, callback) {
   if (!data.key) data.key = key
   data = this.beforeCreate(data)
   data = extend(defaults(this.schema), data)
-
+  console.log('create after defaults', data)
   var validated = this.validate(data)
   if (!validated) return callback(new Error(JSON.stringify(this.validate.errors)))
 
