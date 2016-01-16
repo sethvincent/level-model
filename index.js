@@ -76,7 +76,6 @@ LevelModel.prototype.create = function (data, callback) {
   if (!data.key) data.key = key
   data = this.beforeCreate(data)
   data = extend(defaults(this.schema), data)
-  console.log('create after defaults', data)
   var validated = this.validate(data)
   if (!validated) return callback(new Error(JSON.stringify(this.validate.errors)))
 
