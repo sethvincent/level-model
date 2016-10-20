@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - add CONTRIBUTING.md
 - add CHANGELOG.md
 - add LICENSE.md
+- add .travis.yml
 
 ### Changed
 - updated README.md
