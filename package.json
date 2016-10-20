@@ -17,7 +17,6 @@
     "filter-object-stream": "0.0.1",
     "inherits": "^2.0.3",
     "is-my-json-valid": "^2.15.0",
-    "isarray": "2.0.1",
     "json-schema-defaults": "^0.2.0",
     "level-simple-indexes": "^2.0.0",
     "subleveldown": "^2.1.0",
