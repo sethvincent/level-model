@@ -10,24 +10,24 @@
     "test": "node test.js | tap-spec"
   },
   "dependencies": {
-    "component-emitter": "^1.2.0",
-    "cuid": "^1.2.5",
-    "extend": "^2.0.1",
-    "filter-object": "^1.1.2",
+    "component-emitter": "^1.2.1",
+    "cuid": "^1.3.8",
+    "extend": "^3.0.0",
+    "filter-object": "^2.1.0",
     "filter-object-stream": "0.0.1",
-    "inherits": "^2.0.1",
-    "is-my-json-valid": "^2.12.0",
-    "isarray": "0.0.1",
-    "json-schema-defaults": "^0.1.1",
-    "level-simple-indexes": "^1.0.0",
-    "subleveldown": "^2.0.0",
-    "through2": "^0.6.5"
+    "inherits": "^2.0.3",
+    "is-my-json-valid": "^2.15.0",
+    "isarray": "2.0.1",
+    "json-schema-defaults": "^0.2.0",
+    "level-simple-indexes": "^2.0.0",
+    "subleveldown": "^2.1.0",
+    "through2": "^2.0.1"
   },
   "devDependencies": {
-    "levelup": "^1.1.1",
-    "memdown": "^1.0.0",
-    "tap-spec": "^4.0.0",
-    "tape": "^4.0.0",
-    "through2": "^0.6.5"
+    "levelup": "^1.3.3",
+    "memdown": "^1.2.2",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.6.2",
+    "through2": "^2.0.1"
   }
 }
