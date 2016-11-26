@@ -1,20 +1,15 @@
 var test = require('tape')
-var levelup = require('levelup')
 var through = require('through2')
-var inherits = require('util').inherits
+var inherits = require('inherits')
 
-var model = require('./index')
+var Model = require('../index')
+var db = require('memdb')()
 
-var db = levelup('test', { 
-  db: require('memdown'),
-  valueEncoding: 'json'
-})
+inherits(Example, Model)
 
 function Example (db, opts) {
-  model.call(this, db, opts)
+  Model.call(this, db, opts)
 }
-
-inherits(Example, model)
 
 var example = new Example(db, {
   modelName: 'example',
@@ -54,6 +49,8 @@ test('get a model', function (t) {
   }
 
   example.create(data, function (err, instance) {
+    t.notOk(err)
+
     example.get(instance.key, function (err, retrieved) {
       t.ifError(err, 'no error')
       t.ok(retrieved, 'instance of model exists')
@@ -70,6 +67,7 @@ test('update a model', function (t) {
   }
 
   example.create(data, function (err, instance) {
+    t.notOk(err)
     instance.ok = 2
 
     example.update(instance, function (err, updated) {
@@ -80,7 +78,7 @@ test('update a model', function (t) {
   })
 })
 
-test('reject model creation if it doesnt fit the schema' , function (t) {
+test('reject model creation if it doesnt fit the schema', function (t) {
   var data = {
     test: 'huh',
     ok: 'oops' // should be an integer
@@ -110,15 +108,17 @@ test('list models', function (t) {
 })
 
 test('find models by indexed key', function (t) {
+  t.plan(3)
   var count = 0
 
   function iterator (item, enc, next) {
+    t.ok(item)
     count++
     next()
   }
 
-  function end (a, b, c) {
-    t.end()
+  function end () {
+    t.equal(count, 2)
   }
 
   example.find('ok', 2).pipe(through.obj(iterator, end))
@@ -129,20 +129,21 @@ test('create, update, delete events', function (t) {
     test: 'fourth instance!',
     ok: 4
   }
-  
+
   example.on('create', function (model) {
     t.ok(model)
   })
-  
+
   example.on('update', function (model) {
     t.ok('model')
   })
-  
+
   example.on('delete', function () {
     t.ok(true)
   })
 
   example.create(data, function (err, instance) {
+    t.notOk(err)
     instance.ok = 2
 
     example.update(instance, function (err, updated) {

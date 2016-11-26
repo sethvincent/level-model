@@ -29,7 +29,7 @@ function LevelModel (db, opts) {
     title: self.modelName,
     type: 'object'
   }, this.schema)
-  
+
   this.schema.properties.key = {
     type: 'string'
   }
@@ -167,7 +167,8 @@ LevelModel.prototype.findOne = function (index, options, callback) {
 
 LevelModel.prototype.filter =
 LevelModel.prototype.createFilterStream = function (options) {
-  if (!options.query) var options = { query: options }
+  options = options || {}
+  if (!options.query) options = { query: options }
   return this.createReadStream(options).pipe(through.obj(filter(options.query)))
 }
 

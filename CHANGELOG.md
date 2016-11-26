@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.0.4
+
+### Added
+- examples directory
+- browser example
+- basic usage example
+- use standard
+
+### Changed
+- moved tests to tests/index.js
+- using memdb
+
 ## 2.0.3 - 2015-10-19
 
 ### Added
