@@ -124,7 +124,7 @@ LevelModel.prototype.update = function (key, data, callback) {
     if (self.timestamps) model.updated = self.timestamp()
     model = self.beforeUpdate(model)
 
-    var validated = self.validate(data)
+    var validated = self.validate(model)
     if (!validated) return callback(new Error(JSON.stringify(self.validate.errors)))
 
     self.indexer.updateIndexes(model, function () {

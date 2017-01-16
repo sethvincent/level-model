@@ -78,6 +78,23 @@ test('update a model', function (t) {
   })
 })
 
+test('update a model with partial data', function (t) {
+  var data = {
+    test: 'another instance!',
+    ok: 5
+  }
+
+  example.create(data, function (err, instance) {
+    t.notOk(err)
+
+    example.update(instance.key, {ok: 6}, function (err, updated) {
+      t.notOk(err)
+      t.equal(updated.ok, 6)
+      t.end()
+    })
+  })
+})
+
 test('reject model creation if it doesnt fit the schema', function (t) {
   var data = {
     test: 'huh',
@@ -100,7 +117,7 @@ test('list models', function (t) {
   }
 
   function end () {
-    t.equals(count, 3)
+    t.equals(count, 4)
     t.end()
   }
 
