@@ -1,5 +1,4 @@
 var Emitter = require('component-emitter')
-var inherits = require('inherits')
 var filter = require('filter-object-stream')
 var filterObject = require('filter-object')
 var validator = require('is-my-json-valid')
@@ -9,81 +8,102 @@ var sublevel = require('subleveldown')
 var through = require('through2')
 var extend = require('extend')
 var cuid = require('cuid')
+var partial = require('ap').partial
+
+function identity (n) { return n }
 
 module.exports = LevelModel
-inherits(LevelModel, Emitter)
 
 function LevelModel (db, opts) {
-  if (!(this instanceof LevelModel)) return new LevelModel(db, opts)
-  Emitter.call(this)
-  var self = this
+  opts.hooks = opts.hooks || {}
 
-  this.schema = filterObject(opts, ['*', '!modelName', '!timestamp', '!indexKeys', '!validateOpts', '!prefix'])
-  this.modelName = opts.modelName
-  this.db = sublevel(db, this.modelName, { valueEncoding: 'json' })
-  this.timestamps = opts.timestamps === undefined ? true : opts.timestamps
-  this.timestamp = opts.timestamp || function () { return new Date(Date.now()).toISOString() }
-  this.indexKeys = opts.indexKeys || []
+  var emitter = new Emitter()
+  var self = {}
 
-  this.schema = extend({
-    title: self.modelName,
-    type: 'object'
-  }, this.schema)
-
-  this.schema.properties.key = {
-    type: 'string'
+  self.on = emitter.on.bind(emitter)
+  self.emit = emitter.emit.bind(emitter)
+  self.modelName = opts.modelName
+  self.db = sublevel(db, self.modelName, { valueEncoding: 'json' })
+  self.timestamps = opts.timestamps === undefined ? true : opts.timestamps
+  self.timestamp = opts.timestamp || function () { return new Date(Date.now()).toISOString() }
+  self.indexKeys = opts.indexKeys || []
+  self.validateOpts = opts.validateOpts
+  self.hooks = {
+    beforeCreate: opts.hooks.beforeCreate || identity,
+    beforeUpdate: opts.hooks.beforeUpdate || identity
   }
 
-  if (this.timestamps) {
-    this.schema.properties.created = {
-      type: ['string', 'null'],
-      default: null
-    }
-    this.schema.properties.updated = {
-      type: ['string', 'null'],
-      default: null
-    }
-  }
-
-  this.schema.required = this.schema.required || []
-  if (this.schema.required.indexOf('key') < 0) {
-    this.schema.required = this.schema.required.concat('key')
-  }
-
-  this.validateOpts = opts.validateOpts
-  this.validate = validator(this.schema, opts.validateOpts)
-
-  function map (key, callback) {
-    self.get(key, function (err, val) {
-      callback(err, val)
-    })
-  }
-
-  var indexOpts = opts.indexOpts || {
-    properties: this.indexKeys,
+  self.schema = createSchema()
+  self.validate = validator(self.schema, opts.validateOpts)
+  self.indexDB = sublevel(db, self.modelName + '-index')
+  self.indexer = indexer(self.indexDB, opts.indexOpts || {
+    properties: self.indexKeys,
     keys: true,
     values: true,
-    map: map
-  }
+    map: function map (key, callback) {
+      self.get(key, function (err, val) {
+        callback(err, val)
+      })
+    }
+  })
 
-  this.indexDB = sublevel(db, this.modelName + '-index')
-  this.indexer = indexer(this.indexDB, indexOpts)
+  self.create = partial(create, self)
+  self.get = partial(get, self)
+  self.put = self.save = partial(put, self)
+  self.update = partial(update, self)
+  self.del = self.delete = partial(del, self)
+  self.find = self.createFindStream = partial(find, self)
+  self.findOne = partial(findOne, self)
+  self.createReadStream = partial(createReadStream, self)
+  self.createFilterStream = partial(createFilterStream, self)
+
+  return self
+
+  function createSchema () {
+    var schema = filterObject(opts, ['*', '!modelName', '!timestamp', '!indexKeys', '!validateOpts', '!prefix'])
+
+    schema = extend({
+      title: self.modelName,
+      type: 'object'
+    }, schema)
+
+    schema.properties.key = {
+      type: 'string'
+    }
+
+    if (self.timestamps) {
+      schema.properties.created = {
+        type: ['string', 'null'],
+        default: null
+      }
+      schema.properties.updated = {
+        type: ['string', 'null'],
+        default: null
+      }
+    }
+
+    schema.required = schema.required || []
+    if (schema.required.indexOf('key') < 0) {
+      schema.required = schema.required.concat('key')
+    }
+
+    return schema
+  }
 }
 
-LevelModel.prototype.create = function (data, callback) {
-  var self = this
+function create (self, data, callback) {
   var key = data.key ? data.key : cuid()
   if (!data.key) data.key = key
-  data = this.beforeCreate(data)
-  data = extend(defaults(this.schema), data)
-  var validated = this.validate(data)
-  if (!validated) return callback(new Error(JSON.stringify(this.validate.errors)))
+  data = self.hooks.beforeCreate(data)
+  data = extend(defaults(self.schema), data)
+  var validated = self.validate(data)
+  if (!validated) return callback(new Error(JSON.stringify(self.validate.errors)))
 
-  if (this.timestamps) {
-    data.created = this.timestamp()
+  if (self.timestamps) {
+    data.created = self.timestamp()
     data.updated = null
   }
-  this.db.put(key, data, function (err) {
+  self.db.put(key, data, function (err) {
     if (err) return callback(err)
 
     self.indexer.addIndexes(data, function () {
@@ -93,36 +113,33 @@ LevelModel.prototype.create = function (data, callback) {
   })
 }
 
-LevelModel.prototype.get = function (key, options, callback) {
-  this.db.get(key, options, callback)
+function get (self, key, options, callback) {
+  self.db.get(key, options, callback)
 }
 
-LevelModel.prototype.put =
-LevelModel.prototype.save = function (key, data, callback) {
+function put (self, key, data, callback) {
   if (typeof key === 'object') {
     callback = data
     data = key
     key = data.key
   }
 
-  if (!key) return this.create(data, callback)
-  return this.update(key, data, callback)
+  if (!key) return create(data, callback)
+  return update(key, data, callback)
 }
 
-LevelModel.prototype.update = function (key, data, callback) {
-  var self = this
-
+function update (self, key, data, callback) {
   if (typeof key === 'object') {
     callback = data
     data = key
     key = data.key
   }
 
-  this.get(key, function (err, model) {
+  self.get(key, function (err, model) {
     if (err || !model) return callback(new Error(self.modelName + ' not found with key ' + key))
     model = extend(model, data)
     if (self.timestamps) model.updated = self.timestamp()
-    model = self.beforeUpdate(model)
+    model = self.hooks.beforeUpdate(model)
 
     var validated = self.validate(model)
     if (!validated) return callback(new Error(JSON.stringify(self.validate.errors)))
@@ -136,10 +153,8 @@ LevelModel.prototype.update = function (key, data, callback) {
   })
 }
 
-LevelModel.prototype.del =
-LevelModel.prototype.delete = function (key, callback) {
-  var self = this
-  this.get(key, function (err, data) {
+function del (self, key, callback) {
+  self.get(key, function (err, data) {
     if (err || !data) return callback(err)
     self.indexer.removeIndexes(data, function () {
       self.emit('delete', data)
@@ -148,34 +163,24 @@ LevelModel.prototype.delete = function (key, callback) {
   })
 }
 
-LevelModel.prototype.createReadStream = function (options) {
-  return this.db.createReadStream(options)
+function createReadStream (self, options) {
+  return self.db.createReadStream(options)
 }
 
-LevelModel.prototype.find =
-LevelModel.prototype.createFindStream = function (index, options) {
-  return this.indexer.find(index, options)
+function find (self, index, options) {
+  return self.indexer.find(index, options)
 }
 
-LevelModel.prototype.findOne = function (index, options, callback) {
-  this.indexer.findOne(index, options, function (err, model) {
+function findOne (self, index, options, callback) {
+  self.indexer.findOne(index, options, function (err, model) {
     if (err) return callback(err)
     if (!model) return callback(new Error('[NotFoundError: model not found with ' + index + ' ' + options + ']'))
     return callback(null, model)
   })
 }
 
-LevelModel.prototype.filter =
-LevelModel.prototype.createFilterStream = function (options) {
+function createFilterStream (self, options) {
   options = options || {}
   if (!options.query) options = { query: options }
-  return this.createReadStream(options).pipe(through.obj(filter(options.query)))
-}
-
-LevelModel.prototype.beforeCreate = function (data) {
-  return data
-}
-
-LevelModel.prototype.beforeUpdate = function (data) {
-  return data
+  return createReadStream(options).pipe(through.obj(filter(options.query)))
 }
