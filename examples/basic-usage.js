@@ -1,15 +1,9 @@
 var level = require('memdb')
 var Model = require('../index')
-var inherits = require('inherits')
+
 var db = level()
 
-function Posts (db, opts) {
-  Model.call(this, db, opts)
-}
-
-inherits(Posts, Model)
-
-var posts = new Posts(db, {
+var posts = Model(db, {
   modelName: 'example',
   indexKeys: ['test', 'ok'],
   properties: {
