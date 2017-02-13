@@ -1,17 +1,10 @@
 var test = require('tape')
 var through = require('through2')
-var inherits = require('inherits')
+var Model = require('../')
 
-var Model = require('../index')
 var db = require('memdb')()
 
-inherits(Example, Model)
-
-function Example (db, opts) {
-  Model.call(this, db, opts)
-}
-
-var example = new Example(db, {
+var example = Model(db, {
   modelName: 'example',
   properties: {
     key: { type: 'string' },

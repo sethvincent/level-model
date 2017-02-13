@@ -35,16 +35,9 @@ npm install --save level-model
 ```js
 var level = require('level')
 var Model = require('level-model')
-var inherits = require('util').inherits
 var db = level('db')
 
-function Posts (db, opts) {
-  Model.call(this, db, opts)
-}
-
-inherits(Posts, Model)
-
-var posts = new Posts(db, {
+var posts = Model(db, {
   modelName: 'example',
   indexKeys: ['test', 'ok'],
   properties: {
@@ -78,20 +71,9 @@ Read about the changes to this project in [CHANGELOG.md](CHANGELOG.md). The form
 
 # API
 
-### Create a model that inherits from level-model
+### Create a model by calling the function exported from `level-model`
 
-```
-var Model = require('level-model')
-var inherits = require('util').inherits
-
-function Posts (db, options) {
-  Model.call(this, db, options)
-}
-
-inherits(Posts, Model)
-```
-
-### `var posts = new Posts(db, options)`
+### `var posts = Model(db, options)`
 
 Options:
 
@@ -120,21 +102,21 @@ The options object can accept anything that [json-schema](http://json-schema.org
 
 ## Format data before create & update
 
-Override level-model's `beforeCreate` and `beforeUpdate` methods to format data before it is saved to the db:
+Add `beforeCreate` and `beforeUpdate` methods to `options.hooks` to format data before it is saved to the db:
 
 ```
-function Posts (db, options) {
-  Model.call(this, db, options)
-}
-
-Posts.prototype.beforeCreate = function (data) {
-  data.slug = slugify(data.title)
-  return data
-}
-
-Posts.prototype.beforeUpdate = function (data) {
-  return data
-}
+var posts = Model(db, {
+  modelName: 'posts',
+  hooks: {
+    beforeCreate: function (data) {
+      data.slug = slugify(data.title)
+      return data
+    },
+    beforeUpdate: function (data) {
+      return data
+    }
+  }
+})
 ```
 
 ## Events
