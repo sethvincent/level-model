@@ -167,8 +167,8 @@ function createReadStream (self, options) {
   return self.db.createReadStream(options)
 }
 
-function find (self, index, options) {
-  return self.indexer.find(index, options)
+function find (self, index, options, callback) {
+  return self.indexer.find(index, options, callback)
 }
 
 function findOne (self, index, options, callback) {
