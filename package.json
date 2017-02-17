@@ -20,10 +20,10 @@
     "filter-object": "^2.1.0",
     "filter-object-stream": "0.0.1",
     "is-my-json-valid": "^2.15.0",
-    "json-schema-defaults": "^0.2.0",
-    "level-simple-indexes": "^2.0.0",
+    "json-schema-defaults": "^0.3.0",
+    "level-simple-indexes": "^2.2.0",
     "subleveldown": "^2.1.0",
-    "through2": "^2.0.1"
+    "through2": "^2.0.3"
   },
   "devDependencies": {
     "inherits": "^2.0.3",
@@ -32,6 +32,6 @@
     "standard": "^8.6.0",
     "tap-spec": "^4.1.1",
     "tape": "^4.6.3",
-    "through2": "^2.0.1"
+    "through2": "^2.0.3"
   }
 }
