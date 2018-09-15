@@ -21,6 +21,7 @@
     "filter-object-stream": "0.0.1",
     "is-my-json-valid": "^2.15.0",
     "json-schema-defaults": "^0.3.0",
+    "level-lock": "^1.0.1",
     "level-simple-indexes": "^2.2.0",
     "subleveldown": "^2.1.0",
     "through2": "^2.0.3"

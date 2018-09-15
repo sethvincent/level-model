@@ -175,3 +175,69 @@ test('delete models', function (t) {
       t.end()
     })
 })
+
+test('create lock', function (t) {
+  t.plan(6)
+  example.create({ key: 'create', test: '1' }, (err, model) => {
+    t.notOk(err)
+    t.ok(model)
+  })
+
+  example.create({ key: 'create', test: '2' }, (err, model) => {
+    t.ok(err)
+    t.notOk(model)
+  })
+
+  example.create({ key: 'create', test: '3' }, (err, model) => {
+    t.ok(err)
+    t.notOk(model)
+  })
+})
+
+test('update lock', function (t) {
+  t.plan(10)
+  example.create({ key: 'update', test: '1' }, (err, model) => {
+    t.notOk(err)
+    t.ok(model)
+
+    example.update({ key: 'update', test: '4' }, (err, model) => {
+      t.notOk(err)
+      t.ok(model)
+      t.ok(model.test === '4')
+      t.ok(model.updated)
+    })
+  })
+
+  example.update({ key: 'update', test: '2' }, (err, model) => {
+    t.ok(err)
+    t.notOk(model)
+  })
+
+  example.update({ key: 'update', test: '3' }, (err, model) => {
+    t.ok(err)
+    t.notOk(model)
+  })
+})
+
+test('delete lock', function (t) {
+  t.plan(7)
+
+  example.create({ key: 'delete', test: '1' }, (err, model) => {
+    t.notOk(err)
+    t.ok(model)
+
+    example.delete('delete', (err) => {
+      t.notOk(err)
+    })
+
+    example.create({ key: 'delete', test: '2' }, (err, model) => {
+      t.ok(err)
+      t.notOk(model)
+    })
+
+    example.update({ key: 'delete', test: '3' }, (err, model) => {
+      t.ok(err)
+      t.notOk(model)
+    })
+  })
+})

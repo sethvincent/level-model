@@ -5,6 +5,7 @@ var validator = require('is-my-json-valid')
 var indexer = require('level-simple-indexes')
 var defaults = require('json-schema-defaults')
 var sublevel = require('subleveldown')
+var createLock = require('level-lock')
 var through = require('through2')
 var extend = require('extend')
 var cuid = require('cuid')
@@ -56,6 +57,7 @@ function LevelModel (db, opts) {
   self.findOne = partial(findOne, self)
   self.createReadStream = partial(createReadStream, self)
   self.createFilterStream = partial(createFilterStream, self)
+  self.lock = partial(lock, self)
 
   return self
 
@@ -103,12 +105,27 @@ function create (self, data, callback) {
     data.created = self.timestamp()
     data.updated = null
   }
-  self.db.put(key, data, function (err) {
-    if (err) return callback(err)
 
-    self.indexer.addIndexes(data, function () {
-      self.emit('create', data)
-      callback(null, data)
+  var unlock = this.lock(key)
+  if (!unlock) return callback(new Error(key + ' is locked'))
+
+  self.db.get(key, function (err, model) {
+    if (!err || model) {
+      unlock()
+      return callback(new Error(self.modelName + ' with key ' + key + ' already exists'))
+    }
+
+    self.db.put(key, data, function (err) {
+      if (err) {
+        unlock()
+        return callback(err)
+      }
+
+      self.indexer.addIndexes(data, function () {
+        self.emit('create', data)
+        unlock()
+        callback(null, data)
+      })
     })
   })
 }
@@ -135,8 +152,15 @@ function update (self, key, data, callback) {
     key = data.key
   }
 
+  var unlock = this.lock(key)
+  if (!unlock) return callback(new Error(key + ' is locked'))
+
   self.get(key, function (err, model) {
-    if (err || !model) return callback(new Error(self.modelName + ' not found with key ' + key))
+    if (err || !model) {
+      unlock()
+      return callback(new Error(self.modelName + ' not found with key ' + key))
+    }
+
     model = extend(model, data)
     if (self.timestamps) model.updated = self.timestamp()
     model = self.hooks.beforeUpdate(model)
@@ -146,19 +170,40 @@ function update (self, key, data, callback) {
 
     self.indexer.updateIndexes(model, function () {
       self.db.put(key, model, function (err) {
+        unlock()
+
+        if (err) {
+          return callback(err)
+        }
+
         self.emit('update', model)
-        callback(err, model)
+        callback(null, model)
       })
     })
   })
 }
 
 function del (self, key, callback) {
+  var unlock = this.lock(key)
+  if (!unlock) return callback(new Error(key + ' is locked'))
+
   self.get(key, function (err, data) {
-    if (err || !data) return callback(err)
-    self.indexer.removeIndexes(data, function () {
-      self.emit('delete', data)
-      self.db.del(key, callback)
+    if (err || !data) {
+      unlock()
+      return callback(err)
+    }
+
+    self.db.del(key, function (err) {
+      unlock()
+
+      if (err) {
+        return callback(err)
+      }
+
+      self.indexer.removeIndexes(data, function () {
+        self.emit('delete', data)
+        callback(null, data)
+      })
     })
   })
 }
@@ -183,4 +228,8 @@ function createFilterStream (self, options) {
   options = options || {}
   if (!options.query) options = { query: options }
   return createReadStream(options).pipe(through.obj(filter(options.query)))
+}
+
+function lock (self, key, mode) {
+  return createLock(self.db, key, mode)
 }
