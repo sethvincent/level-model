@@ -80,7 +80,7 @@ test('update a model with partial data', function (t) {
   example.create(data, function (err, instance) {
     t.notOk(err)
 
-    example.update(instance.key, {ok: 6}, function (err, updated) {
+    example.update(instance.key, { ok: 6 }, function (err, updated) {
       t.notOk(err)
       t.equal(updated.ok, 6)
       t.end()
