@@ -1,7 +1,7 @@
 {
   "name": "level-model",
   "description": "A higher-level module for creating content models using levelup as db and is-my-json-valid for validation",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "repository": {
     "url": "git://github.com/sethvincent/level-model.git"
   },
